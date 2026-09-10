@@ -2,8 +2,29 @@ export default function BusquedaProductos({
   criterioBusqueda,
   textoBusqueda,
   setTextoBusqueda,
-  articulosFiltrados
+  articulosFiltrados,
+  alActualizar // Nueva propiedad para recargar la tabla tras borrar
 }) {
+
+  const handleEliminar = (id, nombre) => {
+    const confirmar = window.confirm(`¿Estás seguro de que deseas eliminar el producto:\n${nombre}?`);
+    
+    if (confirmar) {
+      fetch(`http://localhost:8086/api/inventario/articulos/${id}`, {
+        method: 'DELETE'
+      })
+      .then(response => {
+        if (response.ok) {
+          alert('Producto eliminado del sistema.');
+          alActualizar(); // Refresca la lista de inmediato
+        } else {
+          alert('No se puede eliminar. Es probable que este producto ya tenga historial en el Kardex.');
+        }
+      })
+      .catch(error => console.error('Error:', error));
+    }
+  };
+
   return (
     <div style={{ backgroundColor: '#fff', padding: '25px', borderRadius: '12px', boxShadow: '0 1px 3px rgba(0,0,0,0.1)', border: '1px solid #e2e8f0' }}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
@@ -29,6 +50,7 @@ export default function BusquedaProductos({
             <th style={{ padding: '12px' }}>Categoría</th>
             <th style={{ padding: '12px' }}>Stock</th>
             <th style={{ padding: '12px' }}>Precio</th>
+            <th style={{ padding: '12px', textAlign: 'center' }}>Acciones</th>
           </tr>
         </thead>
         <tbody>
@@ -38,7 +60,7 @@ export default function BusquedaProductos({
                 <td style={{ padding: '12px', fontWeight: '500', color: '#0f172a' }}>{art.nombre}</td>
                 <td style={{ padding: '12px', fontSize: '13px' }}>
                   {art.requiereSerie ? (
-                    <span style={{ color: '#b91c1c', backgroundColor: '#fef2f2', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>Sí (Estricto)</span>
+                    <span style={{ color: '#b91c1c', backgroundColor: '#fef2f2', padding: '3px 8px', borderRadius: '4px', fontWeight: 'bold' }}>Sí</span>
                   ) : (
                     <span style={{ color: '#475569' }}>No</span>
                   )}
@@ -49,11 +71,19 @@ export default function BusquedaProductos({
                 </td>
                 <td style={{ padding: '12px', fontWeight: 'bold', color: '#16a34a' }}>{art.stockActual} un.</td>
                 <td style={{ padding: '12px', fontWeight: '500' }}>S/ {art.precioVenta ? art.precioVenta.toFixed(2) : '0.00'}</td>
+                <td style={{ padding: '12px', textAlign: 'center' }}>
+                  <button 
+                    onClick={() => handleEliminar(art.id, art.nombre)}
+                    style={{ backgroundColor: '#ef4444', color: '#fff', border: 'none', padding: '6px 12px', borderRadius: '6px', cursor: 'pointer', fontSize: '12px', fontWeight: 'bold' }}
+                  >
+                    Borrar
+                  </button>
+                </td>
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan="6" style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>No se encontraron productos.</td>
+              <td colSpan="7" style={{ padding: '30px', textAlign: 'center', color: '#94a3b8' }}>No se encontraron productos.</td>
             </tr>
           )}
         </tbody>
