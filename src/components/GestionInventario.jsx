@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export default function GestionInventario({ alGuardar }) {
   const [formData, setFormData] = useState({
@@ -7,6 +7,20 @@ export default function GestionInventario({ alGuardar }) {
   
   // Estado independiente para almacenar los números de serie ingresados
   const [seriesList, setSeriesList] = useState([]);
+
+  useEffect(() => {
+    if (formData.requiereSerie) {
+      const cantidad = parseInt(formData.stockActual) || 0;
+
+      setSeriesList(prev => {
+        const nuevasSeries = [...prev];
+        while (nuevasSeries.length < cantidad) {
+          nuevasSeries.push('');
+        }
+        return nuevasSeries.slice(0, cantidad);
+      });
+    }
+  }, [formData.stockActual, formData.requiereSerie]);
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;

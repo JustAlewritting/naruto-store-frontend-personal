@@ -27,9 +27,20 @@ function App() {
     cargarInventario();
   }, []);
 
-  // Cálculos rápidos para el Dashboard
-  const valorTotalInventario = articulos.reduce((total, art) => total + ((art.precioVenta || 0) * (art.stockActual || 0)), 0);
-  const stockCritico = articulos.filter(art => art.stockActual === 0).length;
+  // Cálculos dinámicos del Dashboard basados en tu inventario real
+  const totalUnidades = articulos.reduce((total, art) => total + (art.stockActual || 0), 0);
+  const valorTotalInventario = articulos.reduce((total, art) => total + ((art.stockActual || 0) * (art.precioVenta || 0)), 0);
+  const productosEnStockCritico = articulos.filter(art => art.stockActual > 0 && art.stockActual <= 3).length;
+
+  // commo no hay fechaCreacion en la BD, asumimos que es stock ingresado en la demo actual
+  const hoy = new Date().toISOString().split('T')[0];
+  const ingresosHoy = articulos.reduce((total, art) => {
+    const fechaRegistro = art.fechaCreacion ? art.fechaCreacion.split('T')[0] : hoy;
+    return fechaRegistro === hoy ? total + (art.stockActual || 0) : total;
+  }, 0);
+
+  // Ventas se mantiene en 0 por el alcance logístico actual del proyecto
+  const ventasDelDia = 0;
 
   const articulosFiltrados = articulos.filter(art => {
     if (!textoBusqueda) return true;
@@ -124,8 +135,11 @@ if (!estaAutenticado) {
           {vistaActual === 'dashboard' && (
             <Dashboard
               articulos={articulos}
-              stockCritico={stockCritico}
+              productosEnStockCritico={productosEnStockCritico}
               valorTotalInventario={valorTotalInventario}
+              totalUnidades={totalUnidades}
+              ventasDelDia={ventasDelDia}
+              ingresosHoy={ingresosHoy}
             />
           )}
 
