@@ -8,7 +8,6 @@ export default function BusquedaProductos({
 
   const handleEliminar = (id, nombre) => {
     const confirmar = window.confirm(`¿Estás seguro de que deseas eliminar el producto:\n${nombre}?`);
-    valorTotalInventario
     if (confirmar) {
       fetch(`http://localhost:8086/api/inventario/articulos/${id}`, {
         method: 'DELETE'
